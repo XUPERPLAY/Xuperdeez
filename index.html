@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deezer Infinity - Sin Límites</title>
+  <title>Deezer Infinity - Catálogo Completo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body { margin: 0; font-family: 'Circular', -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: white; }
@@ -19,13 +19,16 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
     .track { background: #181818; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
     .track img { width: 100%; border-radius: 4px; }
+    
     .player { position: fixed; bottom: 0; width: 100%; background: #181818; padding: 15px; }
+    
+    .loading { text-align: center; padding: 40px; }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="logo"><i class="fab fa-deezer"></i> Deezer Infinity</div>
-    <input type="text" class="search-input" id="search" placeholder="Buscar canciones completas..." onkeyup="searchMusic(event)">
+    <input type="text" class="search-input" id="search" placeholder="Buscar millones de canciones..." onkeyup="searchMusic(event)">
   </div>
 
   <div class="sidebar">
@@ -37,36 +40,45 @@
   <div class="content">
     <h2>Catálogo Completo (Sin límites)</h2>
     
-    <!-- Reproductor completo -->
-    <iframe id="musicPlayer" src="https://www.jamendo.com/widget/playlist/12231" width="100%" height="350" frameborder="0"></iframe>
+    <!-- Reproductor embebido -->
+    <iframe id="musicPlayer" src="https://www.soundcloud.com/oembed?url=https://soundcloud.com/mixes-of-the-week&format=json" width="100%" height="350" frameborder="0" class="deezer-widget"></iframe>
     
     <div class="grid" id="library"></div>
   </div>
 
   <script>
-    // 🎯 MEGA FUENTES DE MÚSICA COMPLETA
+    // 🎯 MEGA BIBLIOTECA UNIVERSAL (Sin restricciones)
     const MUSIC_SOURCES = [
+      // Jamendo API (canciones completas)
       {
         name: "Jamendo",
-        search: "https://api.jamendo.com/v3.0/tracks",
-        player: "https://www.jamendo.com/track/",
-        apiKey: "c9c3e7c5"
+        api: "https://api.jamendo.com/v3.0/tracks",
+        key: "c9c3e7c5",
+        player: "https://www.jamendo.com/track/"
       },
+      // Internet Archive (dominio público)
       {
-        name: "Internet Archive",
-        search: "https://archive.org/advancedsearch.php",
+        name: "Archive",
+        api: "https://archive.org/advancedsearch.php",
         player: "https://archive.org/details/"
       },
+      // Free Music Archive
       {
-        name: "Free Music Archive",
-        search: "https://freemusicarchive.org/api/track/search",
+        name: "FMA",
+        api: "https://freemusicarchive.org/api/track/search",
         player: "https://freemusicarchive.org/music/"
+      },
+      // SoundCloud embed
+      {
+        name: "SoundCloud",
+        api: "https://api.soundcloud.com/tracks",
+        player: "https://soundcloud.com/"
       }
     ];
 
     // 🎵 Cargar música sin restricciones
     async function loadChart() {
-      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100');
+      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&order=popularity_total');
       const data = await res.json();
       renderLibrary(data.results);
     }
@@ -80,15 +92,16 @@
     }
 
     async function loadNew() {
-      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&order=popularity_total');
+      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&order=creationdate');
       const data = await res.json();
       renderLibrary(data.results);
     }
 
     // 🎨 Renderizar
     function renderLibrary(tracks) {
-      document.getElementById('library').innerHTML = tracks.map(track => `
-        <div class="track" onclick="playInSource('${track.id}', '${track.name}', '${track.artist_name}')">
+      const container = document.getElementById('library');
+      container.innerHTML = tracks.map(track => `
+        <div class="track" onclick="playTrack('${track.id}', '${track.name}', '${track.artist_name}')">
           <img src="${track.image}" alt="${track.name}">
           <h4>${track.name}</h4>
           <p>${track.artist_name}</p>
@@ -97,11 +110,11 @@
     }
 
     // 🎵 Reproducir canciones completas
-    function playInSource(id, title, artist) {
-      // Abrir en Jamendo (canciones completas)
+    function playTrack(id, title, artist) {
+      // Abrir en fuente completa
       window.open(`https://www.jamendo.com/track/${id}`, '_blank');
       
-      // Actualizar widget
+      // Actualizar reproductor
       document.getElementById('musicPlayer').src = `https://www.jamendo.com/widget/track/${id}`;
     }
 
