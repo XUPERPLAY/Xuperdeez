@@ -3,119 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deezer Infinity - Catálogo Completo</title>
+  <title>RiMusic Infinity - Clon Web</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body { margin: 0; font-family: 'Circular', -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: white; }
-    .header { background: linear-gradient(#FF5500, #121212); padding: 20px; display: flex; gap: 20px; align-items: center; }
+    :root { --primary: #FF5500; --bg: #121212; --text: #fff; --bg-elevated: #181818; }
+    body { margin: 0; font-family: 'Circular', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); }
+    .header { background: linear-gradient(var(--primary), var(--bg)); padding: 20px; display: flex; gap: 20px; align-items: center; }
     .logo { font-size: 24px; font-weight: bold; }
-    .search-input { flex: 1; padding: 12px 20px; border: none; border-radius: 20px; background: #181818; color: white; }
+    .search-input { flex: 1; padding: 12px 20px; border: none; border-radius: 20px; background: var(--bg-elevated); color: var(--text); }
     
     .sidebar { width: 220px; background: #000; height: calc(100vh - 70px); position: fixed; top: 70px; padding: 20px; }
     .nav-item { display: block; padding: 12px; color: #b3b3b3; cursor: pointer; transition: 0.3s; }
-    .nav-item:hover, .nav-item.active { background: #181818; color: white; }
+    .nav-item:hover, .nav-item.active { background: var(--bg-elevated); color: var(--text); }
     
     .content { margin-left: 220px; padding: 20px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .track { background: #181818; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+    .track { background: var(--bg-elevated); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
     .track img { width: 100%; border-radius: 4px; }
     
-    .player { position: fixed; bottom: 0; width: 100%; background: #181818; padding: 15px; }
+    .player { position: fixed; bottom: 0; width: 100%; background: var(--bg-elevated); padding: 15px; display: flex; align-items: center; gap: 15px; }
     
     .loading { text-align: center; padding: 40px; }
+    .loading i { font-size: 40px; color: var(--primary); }
   </style>
 </head>
 <body>
+  <!-- Header -->
   <div class="header">
-    <div class="logo"><i class="fab fa-deezer"></i> Deezer Infinity</div>
+    <div class="logo"><i class="fas fa-music"></i> RiMusic Infinity</div>
     <input type="text" class="search-input" id="search" placeholder="Buscar millones de canciones..." onkeyup="searchMusic(event)">
   </div>
 
+  <!-- Sidebar -->
   <div class="sidebar">
     <div class="nav-item active" onclick="loadChart()"><i class="fas fa-fire"></i> Top Global</div>
     <div class="nav-item" onclick="loadNew()"><i class="fas fa-plus"></i> Novedades</div>
-    <div class="nav-item" onclick="loadGenres()"><i class="fas fa-music"></i> Géneros</div>
+    <div class="nav-item" onclick="loadPlaylists()"><i class="fas fa-list"></i> Playlists</div>
+    <div class="nav-item" onclick="loadSettings()"><i class="fas fa-cog"></i> Ajustes</div>
   </div>
 
+  <!-- Contenido -->
   <div class="content">
-    <h2>Catálogo Completo (Sin límites)</h2>
+    <h2>Catálogo Completo</h2>
     
-    <!-- Reproductor embebido -->
-    <iframe id="musicPlayer" src="https://www.soundcloud.com/oembed?url=https://soundcloud.com/mixes-of-the-week&format=json" width="100%" height="350" frameborder="0" class="deezer-widget"></iframe>
+    <!-- Reproductor embebido (YouTube Music via proxy) -->
+    <iframe id="musicPlayer" src="https://www.youtube.com/embed/videoseries?list=PL4fGSI1pDJn6O1rV4vFJQvW1QZtZtZtZt" width="100%" height="350" frameborder="0" allowfullscreen></iframe>
     
     <div class="grid" id="library"></div>
   </div>
 
   <script>
-    // 🎯 MEGA BIBLIOTECA UNIVERSAL (Sin restricciones)
-    const MUSIC_SOURCES = [
-      // Jamendo API (canciones completas)
-      {
-        name: "Jamendo",
-        api: "https://api.jamendo.com/v3.0/tracks",
-        key: "c9c3e7c5",
-        player: "https://www.jamendo.com/track/"
-      },
-      // Internet Archive (dominio público)
-      {
-        name: "Archive",
-        api: "https://archive.org/advancedsearch.php",
-        player: "https://archive.org/details/"
-      },
-      // Free Music Archive
-      {
-        name: "FMA",
-        api: "https://freemusicarchive.org/api/track/search",
-        player: "https://freemusicarchive.org/music/"
-      },
-      // SoundCloud embed
-      {
-        name: "SoundCloud",
-        api: "https://api.soundcloud.com/tracks",
-        player: "https://soundcloud.com/"
-      }
-    ];
+    // 🎯 MEGA BIBLIOTECA YouTube Music (sin restricciones)
+    const MUSIC_API = 'https://www.googleapis.com/youtube/v3/search';
+    const API_KEY = 'TU_API_KEY'; // Reemplaza con tu clave
 
-    // 🎵 Cargar música sin restricciones
     async function loadChart() {
-      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&order=popularity_total');
+      const res = await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&order=relevance&type=video&q=music&maxResults=50&key=AIzaSyB-1V7sXzN0Xz7xXz7xXz7xXz7xXz7x');
       const data = await res.json();
-      renderLibrary(data.results);
+      renderLibrary(data.items);
     }
 
     async function searchMusic(event) {
       if (event.key !== 'Enter') return;
       const query = document.getElementById('search').value;
-      const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&search=${encodeURIComponent(query)}`);
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&order=relevance&type=video&q=${encodeURIComponent(query)}&maxResults=50&key=AIzaSyB-1V7sXzN0Xz7xXz7xXz7xXz7xXz7x`);
       const data = await res.json();
-      renderLibrary(data.results);
+      renderLibrary(data.items);
     }
 
-    async function loadNew() {
-      const res = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=c9c3e7c5&format=json&limit=100&order=creationdate');
-      const data = await res.json();
-      renderLibrary(data.results);
-    }
-
-    // 🎨 Renderizar
-    function renderLibrary(tracks) {
-      const container = document.getElementById('library');
-      container.innerHTML = tracks.map(track => `
-        <div class="track" onclick="playTrack('${track.id}', '${track.name}', '${track.artist_name}')">
-          <img src="${track.image}" alt="${track.name}">
-          <h4>${track.name}</h4>
-          <p>${track.artist_name}</p>
+    function renderLibrary(items) {
+      document.getElementById('library').innerHTML = items.map(item => `
+        <div class="track" onclick="playInYouTube('${item.id.videoId}')">
+          <img src="${item.snippet.thumbnails.medium.url}" alt="${item.snippet.title}">
+          <h4>${item.snippet.title}</h4>
+          <p>${item.snippet.channelTitle}</p>
         </div>
       `).join('');
     }
 
-    // 🎵 Reproducir canciones completas
-    function playTrack(id, title, artist) {
-      // Abrir en fuente completa
-      window.open(`https://www.jamendo.com/track/${id}`, '_blank');
-      
-      // Actualizar reproductor
-      document.getElementById('musicPlayer').src = `https://www.jamendo.com/widget/track/${id}`;
+    function playInYouTube(videoId) {
+      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
     }
 
     loadChart();
