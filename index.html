@@ -3,71 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deezer Clone - Vercel</title>
+  <title>Deezer Online</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body { margin: 0; font-family: 'Circular', -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: white; }
-    .header { background: linear-gradient(#FF5500, #121212); padding: 20px; display: flex; align-items: center; gap: 20px; }
+    body { margin: 0; font-family: 'Circular', sans-serif; background: #121212; color: white; }
+    .header { background: linear-gradient(#FF5500, #121212); padding: 20px; display: flex; gap: 20px; }
     .logo { font-size: 24px; font-weight: bold; }
-    .search-box { flex: 1; position: relative; }
-    .search-input { width: 100%; padding: 12px 40px; border: none; border-radius: 20px; background: #181818; color: white; }
+    .search-input { flex: 1; padding: 12px; border: none; border-radius: 20px; background: #181818; color: white; }
     .content { padding: 20px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-    .card { background: #181818; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+    .card { background: #181818; padding: 15px; border-radius: 8px; cursor: pointer; }
     .card img { width: 100%; border-radius: 4px; }
     .player { position: fixed; bottom: 0; width: 100%; background: #181818; padding: 15px; display: flex; align-items: center; gap: 15px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo"><i class="fab fa-deezer"></i> Deezer Clone</div>
-    <div class="search-box">
-      <input type="text" class="search-input" id="search" placeholder="Buscar..." onkeyup="searchDeezer(event)">
-    </div>
+    <div class="logo"><i class="fab fa-deezer"></i> Deezer Online</div>
+    <input type="text" class="search-input" id="search" placeholder="Buscar..." onkeyup="loadDeezer(this.value)">
   </div>
 
   <div class="content">
     <div class="grid" id="library"></div>
   </div>
 
-  <audio id="audioPlayer"></audio>
+  <audio id="audioPlayer" controls style="position:fixed; bottom:0; width:100%;"></audio>
 
   <script>
-    // 🔥 Conexión a API Vercel (sin CORS)
-    const API_URL = '/api/deezer';
-
-    async function loadChart() {
-      const res = await fetch(`${API_URL}?endpoint=chart/0/tracks&limit=50`);
+    async function loadDeezer(query = '') {
+      const url = query 
+        ? `https://api.deezer.com/search?q=${query}&limit=100`
+        : 'https://api.deezer.com/chart/0/tracks?limit=100';
+      
+      const res = await fetch(url);
       const data = await res.json();
-      renderLibrary(data.data);
-    }
-
-    async function searchDeezer(e) {
-      if (e.key !== 'Enter') return;
-      const query = document.getElementById('search').value;
-      const res = await fetch(`${API_URL}?endpoint=search&q=${encodeURIComponent(query)}&limit=50`);
-      const data = await res.json();
-      renderLibrary(data.data);
-    }
-
-    function renderLibrary(tracks) {
-      const container = document.getElementById('library');
-      container.innerHTML = tracks.map(track => `
+      
+      document.getElementById('library').innerHTML = data.data.map(track => `
         <div class="card" onclick="playTrack('${track.preview}', '${track.title}', '${track.artist.name}')">
-          <img src="${track.album.cover_medium}" alt="${track.title}">
+          <img src="${track.album.cover_medium}">
           <h4>${track.title}</h4>
           <p>${track.artist.name}</p>
         </div>
       `).join('');
     }
-
+    
     function playTrack(src, title, artist) {
       const audio = document.getElementById('audioPlayer');
       audio.src = src || "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
       audio.play();
     }
-
-    loadChart();
+    
+    loadDeezer();
   </script>
 </body>
 </html>
