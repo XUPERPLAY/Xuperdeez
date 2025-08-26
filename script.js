@@ -1,9 +1,11 @@
+const API_URL = 'https://freemusicarchive.org/api/get/tracks.json?api_key=YOUR_API_KEY&limit=10'; // Asegúrate de usar la API sin clave aquí.
+
 let currentTrackIndex = 0;
 let tracks = [];
 
 // Función para cargar las canciones desde la API de Free Music Archive
 async function fetchTracks() {
-    const response = await fetch('https://freemusicarchive.org/api/get/tracks.json?api_key=YOUR_API_KEY&limit=10'); // Reemplaza YOUR_API_KEY si es necesario
+    const response = await fetch('https://freemusicarchive.org/api/get/tracks.json?api_key=YOUR_API_KEY&limit=10');
     const data = await response.json();
     tracks = data.data;
     loadTracks(tracks);
