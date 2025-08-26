@@ -1,6 +1,4 @@
 deezer-clone/
-├── index.html
-├── vercel.json          # ← CRÍTICO para evitar CORS
-├── package.json         # ← Para Vercel Edge Functions
-└── api/
-    └── deezer.js        # ← Función proxy
+├── index.html     ← Frontend completo
+├── vercel.json    ← Config proxy
+└── README.md      ← Opcional
